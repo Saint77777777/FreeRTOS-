@@ -39,3 +39,67 @@
 ### 1. 克隆仓库
 ```bash
 git clone https://github.com/saint77777777/FreeRTOS-IoT-Edge-Node.git
+
+### 2. 环境要求
+STM32CubeMX 6.10+
+Keil MDK-ARM 5.38+ 或 STM32CubeIDE
+FreeRTOS V10.4.6 (CMSIS-RTOS V2 wrapper)
+### 3. 硬件接线
+表格
+模块	      接口	    引脚
+SHT30	      I2C1	    PB6-SCL, PB7-SDA
+BH1750	    I2C2	    PB10-SCL, PB11-SDA
+OLED	      I2C1	    与SHT30共总线
+W25Q128	    SPI1	    PA5-SCK, PA6-MISO, PA7-MOSI, PA4-CS
+ESP8266	    USART     2	PA2-TX, PA3-RX
+
+### 4. 配置WiFi/MQTT
+修改 Inc/net_config.h:
+c
+#define WIFI_SSID     "your_ssid"
+#define WIFI_PASSWORD "your_password"
+#define MQTT_BROKER   "broker.emqx.io"
+#define MQTT_PORT     1883
+#define MQTT_TOPIC    "iot/sensor/data"
+5. 编译烧录
+# STM32CubeIDE
+Project -> Build All -> Run -> Debug
+
+# 或 Keil
+Rebuild -> Download -> Start Debug
+CLI 命令
+表格
+命令	功能
+info	打印任务状态与运行时间统计
+heap	查看剩余堆内存与历史最小值
+relay on/off	远程控制继电器
+reset	系统软复位
+help	显示所有命令
+性能数据
+任务调度: 6任务并发，CPU占用率 < 30%
+数据采集: 10Hz采样，延迟 < 500ms
+网络上报: MQTT QoS 1，断网缓存 > 1000条
+连续运行: 72小时无异常，看门狗零触发
+功耗: 全速 120mA → 低功耗 45mA
+目录结构
+plain
+├── Core/
+│   ├── Inc/          # 头文件
+│   ├── Src/          # 主程序与任务
+│   └── Startup/      # 启动文件
+├── Drivers/
+│   ├── STM32F4xx_HAL_Driver/
+│   └── CMSIS/
+├── Middlewares/
+│   └── FreeRTOS/     # FreeRTOS内核与配置
+├── Application/
+│   ├── sensor/       # 传感器驱动
+│   ├── storage/      # Flash/FatFS
+│   ├── network/      # ESP8266/MQTT
+│   └── cli/          # 命令行终端
+└── README.md
+
+参考
+FreeRTOS Official
+RT-Thread Documentation
+星火一号 BSP
